@@ -8,22 +8,22 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
-namespace time_editor
+namespace TimeEditor
 {
-    public partial class Form1 : Form
+    public partial class TimeEditorForm : Form
     {
         //global stuffs
-        
+
         string[] settings = new string[9];
 
-        public Form1()
+        public TimeEditorForm()
         {
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void TimeEditorForm_Load(object sender, EventArgs e)
         {
-            
+
             StreamReader myFile = null;
             while (myFile == null)
             {
@@ -42,59 +42,43 @@ namespace time_editor
 
                     lblX.Text = settings[0];
                     lblY.Text = settings[1];
-                    
 
-                    if (settings[2] == "false")
-                    {
-                        chkImage.Checked = false;
-                        txtFilePath.Enabled = false;
-                        chkTrans.Enabled = true;
-                        lblBGColors.Enabled = true;
-                        cmdBGColor.Enabled = true;
-                        cmdBrowse.Enabled = false;
-                    }
-                    else if (settings[2] == "true")
-                    {
-                        chkImage.Checked = true;
-                        txtFilePath.Enabled = true;
-                        chkTrans.Enabled = false;
-                        lblBGColors.Enabled = false;
-                        cmdBGColor.Enabled = false;
-                        cmdBrowse.Enabled = true;
-                    }
-                    lblFilePath.Text = settings[3];
-                    lblImage.Text = chkImage.Checked.ToString().ToLower();
 
+                    if (settings[2] != "")
+                    {
+                        string[] splitbgcolor = settings[2].Split(',');
+                        lblBGColor.BackColor = Color.FromArgb(Convert.ToInt32(splitbgcolor[0]), Convert.ToInt32(splitbgcolor[1]), Convert.ToInt32(splitbgcolor[2]));
+                    }
                     //grab rbg from options and split and set as lb, colors
-                    string[] splitbgcolor = settings[4].Split(',');
-                    lblBGColor.BackColor = Color.FromArgb(Convert.ToInt32(splitbgcolor[0]), Convert.ToInt32(splitbgcolor[1]), Convert.ToInt32(splitbgcolor[2]));
                     
-                    
+
                     //transparency
-                    if (settings[5] == "false")
+                    if (settings[3] == "false")
                     {
                         chkTrans.Checked = false;
                     }
-                    else if (settings[5] == "true")
+                    else if (settings[3] == "true")
                     {
                         chkTrans.Checked = true;
                     }
                     lblTransparent.Text = chkTrans.Checked.ToString().ToLower();
-                    
-                    //text color
-                    string[] splittxtcolor = settings[6].Split(',');
-                    lblTxtColor.BackColor = Color.FromArgb(Convert.ToInt32(splittxtcolor[0]), Convert.ToInt32(splittxtcolor[1]), Convert.ToInt32(splittxtcolor[2]));
 
+                    if (settings[4] != "")
+                    {
+                        //text color
+                        string[] splittxtcolor = settings[4].Split(',');
+                        lblTxtColor.BackColor = Color.FromArgb(Convert.ToInt32(splittxtcolor[0]), Convert.ToInt32(splittxtcolor[1]), Convert.ToInt32(splittxtcolor[2]));
+                    }
                     //font name thats in use and size and what it looks like
-                    lblFontName.Text = settings[7];
-                    Font f = new Font(settings[7], 8.25f);                    
+                    lblFontName.Text = settings[5];
+                    Font f = new Font(settings[5], 8.25f);
                     lblFontName.Font = f;
                     //example of what the font looks like
-                    cbxFontName.Text = settings[7];
+                    cbxFontName.Text = settings[5];
                     lblFontExample.Font = new Font(cbxFontName.Text, 8.25f);
 
                     //font size
-                    lblFontSize.Text = settings[8];
+                    lblFontSize.Text = settings[6];
 
 
                     //list of fonts
@@ -110,8 +94,6 @@ namespace time_editor
                         StreamWriter myFileSW = new StreamWriter("Options.txt");
                         myFileSW.WriteLine("0");//x
                         myFileSW.WriteLine("0");//y
-                        myFileSW.WriteLine("false");//imagecheck
-                        myFileSW.WriteLine("");//filepath
                         myFileSW.WriteLine("255,255,0");//bgcolor
                         myFileSW.WriteLine("true");//transparent
                         myFileSW.WriteLine("0,255,255");//txtcolor
@@ -121,49 +103,22 @@ namespace time_editor
                     }
                 }
             }
-            
-            
+
+
         }
-        private void chkImage_CheckedChanged(object sender, EventArgs e)
+
+        private void cmdResetBG_Click(object sender, EventArgs e)
         {
-            if (chkImage.Checked == true)
-            {
-                txtFilePath.Enabled = true;
-                chkTrans.Enabled = false;
-                lblBGColors.Enabled = false;
-                cmdBGColor.Enabled = false;
-                cmdBrowse.Enabled = true;
-            }
-            else if (chkImage.Checked == false)
-            {
-                txtFilePath.Enabled = false;
-                chkTrans.Enabled = true;
-                lblBGColors.Enabled = true;
-                cmdBGColor.Enabled = true;
-                cmdBrowse.Enabled = false;
-            }
-        }        
-        private void cmdResetImage_Click(object sender, EventArgs e)
-        {
-            if (settings[2] == "false")
-            {
-                chkImage.Checked = false;
-            }
-            else if (settings[2] == "true")
-            {
-                chkImage.Checked = true;
-            }
-            txtFilePath.Text = "";
-            if (settings[5] == "false")
+            if (settings[3] == "false")
             {
                 chkTrans.Checked = false;
             }
-            else if (settings[5] == "true")
+            else if (settings[3] == "true")
             {
                 chkTrans.Checked = true;
             }
             lblBGColors.BackColor = SystemColors.Control;
-        }        
+        }
         private void cmdResetXY_Click(object sender, EventArgs e)
         {
             txtY.Text = "";
@@ -171,10 +126,10 @@ namespace time_editor
         }
         private void cmdResetTxt_Click(object sender, EventArgs e)
         {
-            lblTxtColors.BackColor = SystemColors.Control; 
+            lblTxtColors.BackColor = SystemColors.Control;
             txtFontSize.Text = "";
-            cbxFontName.Text = settings[7];
-            lblFontExample.Font = new Font(settings[7], 8.25f);            
+            cbxFontName.Text = settings[5];
+            lblFontExample.Font = new Font(settings[5], 8.25f);
         }
         private void cbxFontName_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -182,32 +137,23 @@ namespace time_editor
         }
         private void cmdBGColor_Click(object sender, EventArgs e)
         {
-            //shows color dialog box
-            DialogResult result = colorDialog1.ShowDialog();
-            if (result == DialogResult.OK)
-	        {
-		        // Set form background to the selected color.
-                lblBGColors.BackColor = colorDialog1.Color;
-	        }            
-        }
-        private void cmdtxtcolor_Click(object sender, EventArgs e)
-        {
-            //shows color dialog box
             DialogResult result = colorDialog1.ShowDialog();
             if (result == DialogResult.OK)
             {
-                // Set form background to the selected color.
+                lblBGColors.BackColor = colorDialog1.Color;
+            }
+        }
+        private void cmdtxtcolor_Click(object sender, EventArgs e)
+        {
+            DialogResult result = colorDialog1.ShowDialog();
+            if (result == DialogResult.OK)
+            {
                 lblTxtColors.BackColor = colorDialog1.Color;
             }
         }
         private void cmdSave_Click(object sender, EventArgs e)
         {
-
-            //save stuff to file
             StreamWriter myFileSW = new StreamWriter("Options.txt");
-            //because i load chkboxs into it i dont need to compare to old...just store
-
-
             if (txtX.Text != "")
             {
                 myFileSW.WriteLine(txtX.Text);
@@ -227,31 +173,21 @@ namespace time_editor
 
 
             ////////////////
+
+
+
+
+
             
-
-            myFileSW.WriteLine(chkImage.Checked.ToString().ToLower());
-
-
-
-            //url
-            if (txtFilePath.Text != "")
-            {
-                myFileSW.WriteLine(txtFilePath.Text);
-            }
-            else
-            {
-                myFileSW.WriteLine(settings[3]);
-            }
-
 
             //bgcolor
             if (lblBGColors.BackColor != SystemColors.Control)
-            {                
+            {
                 myFileSW.WriteLine(lblBGColors.BackColor.R + "," + lblBGColors.BackColor.G + "," + lblBGColors.BackColor.B);
             }
             else
             {
-                myFileSW.WriteLine(settings[4]);
+                myFileSW.WriteLine(settings[2]);
             }
 
             myFileSW.WriteLine(chkTrans.Checked.ToString().ToLower());
@@ -263,7 +199,7 @@ namespace time_editor
             }
             else
             {
-                myFileSW.WriteLine(settings[6]);
+                myFileSW.WriteLine(settings[4]);
             }
 
 
@@ -275,31 +211,13 @@ namespace time_editor
             }
             else
             {
-                myFileSW.WriteLine(settings[8]);
+                myFileSW.WriteLine(settings[6]);
             }
 
             myFileSW.Close();
             Close();
         }
 
-        private void cmdBrowse_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            openFileDialog1.InitialDirectory = Directory.GetCurrentDirectory();
-            openFileDialog1.Filter = "Image Files(*.BMP;*.JPG;*.GIF;*.PNG)|*.BMP;*.JPG;*.GIF;*.PNG|All files (*.*)|*.*";
-            
 
-            if (openFileDialog1.ShowDialog() == DialogResult.OK)
-            {
-                try
-                {
-                    txtFilePath.Text = openFileDialog1.FileName;
-                }
-                catch (Exception ex)
-                {
-                    
-                }
-            }
-        }
     }
 }

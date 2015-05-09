@@ -13,19 +13,24 @@ using System.Diagnostics;
 
 namespace time
 {
-    public partial class Form1 : Form
+    public partial class MyDigitalClock : Form
     {
         public System.Timers.Timer myTime;
         DateTime theTime;
         MethodInvoker deleg;
         ElapsedEventHandler timer;
         bool close = false;
+        int finalLine;
+        File myCurrentFile = new File();
 
-        public Form1()
+
+
+
+        public MyDigitalClock()
         {
             InitializeComponent();
-
-
+            deleg = new MethodInvoker(invoke);
+            timer = new ElapsedEventHandler(lblTimeInvoke);
             Process[] MyProc = Process.GetProcessesByName("time");
             if (MyProc.Length == 1 || MyProc.Length == 0)
             {
@@ -35,120 +40,104 @@ namespace time
             {
                 MessageBox.Show("Can't run as the program is already running");
                 close = true;
-            }   
+            }
+            ReadFile();
+            SetOptions();
+            myTime = new System.Timers.Timer(1000);
+            myTime.Enabled = true;
+            myTime.Elapsed += timer;
+        }
 
-            
-            deleg = new MethodInvoker(invoke);
-            timer = new ElapsedEventHandler(testy);
 
-            StreamReader myFile = null;
-            while (myFile == null)
+        public void ReadFile()
+        {
+            try
             {
-                try
+                var myFile = new StreamReader("Options.txt");
+                List<string> settings = new List<string>();
+                string option;
+                //grab all the data from the txt file
+                while ((option = myFile.ReadLine()) != null)
                 {
-                    string[] settings = new string[9];
-                    myFile = new StreamReader("Options.txt");
-                    string option;
-                    int i = 0;
-                    //grab all the data from the txt file
-                    while ((option = myFile.ReadLine()) != null)
-                    {
-                        settings[i] = option;
-                        i++;
-                    }
-                    myFile.Close();
-
-                    this.Left = Convert.ToInt32(settings[0]);
-                    this.Top = Convert.ToInt32(settings[1]);
-                    
-                    
-                    if (settings[2] == "true")
-                    {
-                        try
-                        {
-                            this.BackgroundImage = Image.FromFile(settings[3]);
-                        }
-                        catch
-                        {
-                            MessageBox.Show("The file as the background image can't be located");
-                            close = true;
-                        }
-                        this.BackgroundImageLayout = ImageLayout.Stretch;
-                    }
-                    else
-                    {
-                        //background color
-                        string[] splitbgcolor = settings[4].Split(',');
-                        this.BackColor = Color.FromArgb(Convert.ToInt32(splitbgcolor[0]), Convert.ToInt32(splitbgcolor[1]), Convert.ToInt32(splitbgcolor[2]));
-
-                        if (settings[5] == "true")
-                        {
-                            //transparent
-                            this.BackColor = Color.White;
-                            this.TransparencyKey = Color.Transparent;
-                        }
-                    }
-
-
-                    string[] splittxtcolor = settings[6].Split(',');
-
-                    this.lblthetime.ForeColor = Color.FromArgb(Convert.ToInt32(splittxtcolor[0]), Convert.ToInt32(splittxtcolor[1]), Convert.ToInt32(splittxtcolor[2]));
-
-                    this.lblthetime.Font = new Font(settings[7], Convert.ToInt32(settings[8]), FontStyle.Bold);
-
-
-                    //set height to height of label
-                    this.Height = lblthetime.Height + 15;
-                    myFile.Dispose();
-
-                    myTime = new System.Timers.Timer(1000);
-                    myTime.Enabled = true;
-                    myTime.Elapsed += timer;
+                    settings.Add(option);
                 }
-                catch (FileNotFoundException ex)
-                {
-                    if (myFile == null)
-                    {
-                        StreamWriter myFileSW = new StreamWriter("Options.txt");
-                        myFileSW.WriteLine("0");//x
-                        myFileSW.WriteLine("0");//y
-                        myFileSW.WriteLine("false");//imagecheck
-                        myFileSW.WriteLine("");//filepath
-                        myFileSW.WriteLine("255,255,0");//bgcolor
-                        myFileSW.WriteLine("true");//transparent
-                        myFileSW.WriteLine("0,255,255");//txtcolor
-                        myFileSW.WriteLine("Arial");//fontname
-                        myFileSW.WriteLine("30");//fontsize
-                        myFileSW.Close();
-                    }
-                }
+                myFile.Close();
+                myCurrentFile.XLocation = Convert.ToInt32(settings[0]);
+                myCurrentFile.YLocation = Convert.ToInt32(settings[1]);
+                myCurrentFile.RGBBackGroundColor = settings[2];
+                myCurrentFile.Transparent = Convert.ToBoolean(settings[3]);
+                myCurrentFile.RGBTextColor = settings[4];
+                myCurrentFile.FontType = settings[5];
+                myCurrentFile.FontSize = Convert.ToInt32(settings[6]);
+            }
+            catch (FileNotFoundException ex)
+            {
+                myCurrentFile.XLocation = 0;
+                myCurrentFile.YLocation = 0;
+                myCurrentFile.RGBBackGroundColor = "";
+                myCurrentFile.Transparent = true;
+                myCurrentFile.RGBTextColor = "0,255,255";
+                myCurrentFile.FontType = "Arial";
+                myCurrentFile.FontSize = 20;
+                StreamWriter myFileSW = new StreamWriter("Options.txt");
+                myFileSW.WriteLine(myCurrentFile.XLocation);//x
+                myFileSW.WriteLine(myCurrentFile.YLocation);//y
+                myFileSW.WriteLine(myCurrentFile.RGBBackGroundColor);//bgcolor
+                myFileSW.WriteLine(myCurrentFile.Transparent);//transparent
+                myFileSW.WriteLine(myCurrentFile.RGBTextColor);//txtcolor
+                myFileSW.WriteLine(myCurrentFile.FontType);//fontname
+                myFileSW.WriteLine(myCurrentFile.FontSize);//fontsize
+                myFileSW.Close();
             }
         }
 
 
 
-        public void testy(object sender, ElapsedEventArgs e)
+        public void SetOptions()
+        {
+            this.Left = myCurrentFile.XLocation;
+            this.Top = myCurrentFile.YLocation;
+            if (myCurrentFile.RGBBackGroundColor != "")
+            {
+                string[] splitbgcolor = myCurrentFile.RGBBackGroundColor.Split(',');
+                this.BackColor = Color.FromArgb(Convert.ToInt32(splitbgcolor[0]), Convert.ToInt32(splitbgcolor[1]), Convert.ToInt32(splitbgcolor[2]));
+            }
+            if (myCurrentFile.Transparent == true)
+            {
+                this.BackColor = Color.Black;
+                this.lblthetime.BackColor = Color.Black;
+                this.TransparencyKey = Color.Black;
+            }
+            string[] splittxtcolor = myCurrentFile.RGBTextColor.Split(',');
+            lblthetime.ForeColor = Color.FromArgb(Convert.ToInt32(splittxtcolor[0]), Convert.ToInt32(splittxtcolor[1]), Convert.ToInt32(splittxtcolor[2]));
+            lblthetime.Font = new Font(myCurrentFile.FontType, myCurrentFile.FontSize, FontStyle.Bold);
+            Height = lblthetime.Height + 15;
+        }
+
+
+
+        public void lblTimeInvoke(object sender, ElapsedEventArgs e)
         {
             try
             {
-                lblthetime.Invoke(deleg);                
+                lblthetime.Invoke(deleg);
             }
             catch
             {
+
             }
         }
 
         public DateTime test()
-        {            
+        {
             theTime = DateTime.Now;
             return theTime;
         }
 
         private void invoke()
         {
-            
             lblthetime.Text = test().ToString();
-            GC.Collect();//this works
+            GC.Collect();
             this.Width = lblthetime.Width + 20;
         }
 
@@ -159,5 +148,5 @@ namespace time
                 Application.Exit();
             }
         }
-    }   
+    }
 }

@@ -1,6 +1,6 @@
 ﻿namespace time
 {
-    partial class Form1
+    partial class MyDigitalClock
     {
         /// <summary>
         /// Required designer variable.
@@ -42,16 +42,16 @@
             this.lblthetime.TabIndex = 1;
             this.lblthetime.Text = "ace";
             // 
-            // Form1
+            // MyDigitalClock
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(616, 67);
+            this.ClientSize = new System.Drawing.Size(616, 62);
             this.Controls.Add(this.lblthetime);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Location = new System.Drawing.Point(2561, 0);
-            this.Name = "Form1";
+            this.Name = "MyDigitalClock";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
